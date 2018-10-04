@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    ext.kotlin_version = '1.2.71'
 
     repositories {
         mavenCentral()
@@ -27,12 +27,12 @@ repositories {
 }
 
 ext {
-    ktor_version = '0.9.1'
+    ktor_version = '0.9.5'
     logback_version = '1.2.3'
-    fuel_version = '1.12.1'
-    kgraphql_version = '0.2.5'
-    koin_version = '0.8.2'
-    squash_version = '0.2.2'
+    fuel_version = '1.15.0'
+    kgraphql_version = '0.2.7'
+    koin_version = '0.9.3'
+    squash_version = '0.2.4'
 }
 
 dependencies {
