@@ -51,6 +51,7 @@ dependencies {
 
     // Networking
     compile "com.github.kittinunf.fuel:fuel:$fuel_version"
+    compile "com.github.kittinunf.fuel:fuel-gson:$fuel_version"
 
     // GraphQL
     compile "com.github.pgutkowski:kgraphql:$kgraphql_version"

@@ -1,6 +1,6 @@
 ## GraphQL Sample API in Kotlin
 
-![](/images/intro_image_brwngrldev_graphql.png)
+![](./images/intro_image_brwngrldev_graphql.png)
 
 This is a sample app for demonstrating creating a GraphQL API written entirely in Kotlin. It uses the following primary dependencies:
 * [Ktor - Server](http://ktor.io)

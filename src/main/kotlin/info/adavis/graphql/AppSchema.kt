@@ -1,17 +1,25 @@
 package info.adavis.graphql
 
-import com.github.pgutkowski.kgraphql.KGraphQL
+import com.github.kittinunf.fuel.gson.responseObject
+import com.github.kittinunf.fuel.httpGet
+import com.github.pgutkowski.kgraphql.KGraphQL.Companion.schema
 import info.adavis.NotFoundException
 import info.adavis.dao.UFOSightingStorage
+import info.adavis.model.Availability
 import info.adavis.model.CountrySightings
+import info.adavis.model.Embedded
+import info.adavis.model.Product
+import info.adavis.model.Products
 import info.adavis.model.UFOSighting
 import info.adavis.model.User
 import info.adavis.model.users
 import java.time.LocalDate
 
-class AppSchema(private val storage: UFOSightingStorage) {
+class AppSchema(
+    private val storage: UFOSightingStorage
+) {
 
-    val schema = KGraphQL.schema {
+    val schema = schema {
 
         configure {
             useDefaultPrettyPrinter = true
@@ -20,6 +28,18 @@ class AppSchema(private val storage: UFOSightingStorage) {
         stringScalar<LocalDate> {
             serialize = { date -> date.toString() }
             deserialize = { dateString -> LocalDate.parse(dateString) }
+        }
+
+        query("products") {
+            description = "BEYOND products"
+
+            resolver { size: Int ->
+                "https://taggle.beyondshop.cloud/api/product-view/products"
+                    .httpGet(listOf("size" to size))
+                    .responseObject<Embedded<Products>>().third.get()._embedded.products
+            }.withArgs {
+                arg<Long> { name = "size"; defaultValue = 10; description = "The number of records to return" }
+            }
         }
 
         query("sightings") {
@@ -33,7 +53,9 @@ class AppSchema(private val storage: UFOSightingStorage) {
         query("sighting") {
             description = "Returns a single UFO Sighting record based on the id"
 
-            resolver { id: Int -> storage.getSighting(id) ?: throw NotFoundException("Sighting with id: $id does not exist") }
+            resolver { id: Int ->
+                storage.getSighting(id) ?: throw NotFoundException("Sighting with id: $id does not exist")
+            }
         }
 
         query("user") {
@@ -62,6 +84,19 @@ class AppSchema(private val storage: UFOSightingStorage) {
 
         inputType<CreateUFOSightingInput>()
 
+        type<Product> {
+            description = "A product"
+
+            property<Availability>("availability") {
+                description = "The availability of the product"
+                resolver { product ->
+                    "https://taggle.beyondshop.cloud/api/product-view/products/${product._id}"
+                        .httpGet()
+                        .responseObject<Map<String, Any>>().third.get()["availabilityState"].toAvailability()
+                }
+            }
+        }
+
         type<UFOSighting> {
             description = "A UFO sighting"
 
@@ -89,4 +124,8 @@ class AppSchema(private val storage: UFOSightingStorage) {
         }
     }
 
+}
+
+private fun Any?.toAvailability(): Availability {
+    return Availability(purchasable = true, availabilityState = this.toString())
 }
